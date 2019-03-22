@@ -1,0 +1,12 @@
+
+#### image informations ####
+#
+# service-name:   simple-app
+# description:    A simple spring boot application
+# git-repo:       ssh://git@github.com:benjamin-lang/simple-app.git
+#
+# command:        /opt/app/run-java.sh
+#
+# mandatory environment variables:
+#
+
