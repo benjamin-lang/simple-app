@@ -15,19 +15,19 @@ public class PartnerService
 {
     private final PartnerMapper mapper;
     private final IdGenerator idGenerator;
-    private final PartnerRepositoryJpa reposiory;
+    private final PartnerRepositoryJpa repository;
 
-    public PartnerService(PartnerMapper mapper, IdGenerator idGenerator, PartnerRepositoryJpa reposiory)
+    public PartnerService(PartnerMapper mapper, IdGenerator idGenerator, PartnerRepositoryJpa repository)
     {
         this.mapper = mapper;
         this.idGenerator = idGenerator;
-        this.reposiory = reposiory;
+        this.repository = repository;
     }
 
     public String registerNewPartner(String fistname, String lastname)
     {
         PartnerDao partner = mapper.create(idGenerator.generateId(), fistname, lastname);
-        reposiory.save(partner);
+        repository.save(partner);
 
         return partner.getId();
     }
@@ -35,14 +35,14 @@ public class PartnerService
 
     public Optional<PartnerDao> queryPartnerById(String partnerId)
     {
-        return reposiory.findById(partnerId);
+        return repository.findById(partnerId);
     }
 
     public List<PartnerDao> queryAllPartners(String lastnameFilter)
     {
         if (StringUtils.isNotEmpty(lastnameFilter))
-            return reposiory.findAllByLastname(lastnameFilter);
+            return repository.findAllByLastname(lastnameFilter);
 
-        return reposiory.findAll();
+        return repository.findAll();
     }
 }
