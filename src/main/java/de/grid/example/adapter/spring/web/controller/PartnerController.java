@@ -1,22 +1,25 @@
-package de.grid.example.adapter.spring.web;
-
+package de.grid.example.adapter.spring.web.controller;
 
 import de.grid.example.adapter.persistence.jpa.model.PartnerDao;
+import de.grid.example.adapter.spring.web.PartnersApi;
 import de.grid.example.adapter.spring.web.mapping.PartnerDtoMapper;
+import de.grid.example.adapter.spring.web.model.GetPartnerDto;
+import de.grid.example.adapter.spring.web.model.PostPartnerDto;
 import de.grid.example.application.PartnerService;
-import de.grid.example.adapter.spring.web.model.PartnerDto;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.Api;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/partners")
-@SuppressWarnings("unused")
-public class PartnerController
+@Api(value = "partners", tags = "partners", description = "REST endpoint for partner management")
+public class PartnerController implements PartnersApi
 {
     private final PartnerService service;
     private final PartnerDtoMapper mapper;
@@ -27,27 +30,40 @@ public class PartnerController
         this.mapper = mapper;
     }
 
-    @GetMapping
-    public List<PartnerDto> getPartners(@RequestParam(required = false) String lastname)
+    @Override
+    public ResponseEntity<GetPartnerDto> getPartner(UUID partnerId)
     {
-        return service.queryAllPartners(lastname).stream().map(mapper::map).collect(Collectors.toList());
+        Optional<PartnerDao> partnerDao = service.queryPartnerById(partnerId.toString());
+
+        return ResponseEntity.ok(partnerDao.map(mapper::mapFromDao).orElse(null));
     }
 
-    @GetMapping("/{partnerId}")
-    public PartnerDto getPartner(@PathVariable String partnerId)
+    @Override
+    public ResponseEntity<List<GetPartnerDto>> getPartners(@Valid String lastnameFilter)
     {
-        Optional<PartnerDao> partnerDaoOpt = service.queryPartnerById(partnerId);
+        List<PartnerDao> partnerDaos = service.queryAllPartners(lastnameFilter);
 
-        return partnerDaoOpt.map(mapper::map).orElse(null);
+        return ResponseEntity.ok(mapper.mapFromDaoList(partnerDaos));
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public String postPartner(@RequestBody PartnerDto partner)
+    @Override
+    public ResponseEntity<Void> postPartner(@Valid PostPartnerDto dto)
     {
-        Assert.hasLength(partner.getFirstname(), "Property 'firstname' must not be null or empty!");
-        Assert.hasLength(partner.getLastname(), "Property 'lastname' must not be null or empty!");
+        String partnerId = service.registerNewPartner(dto.getLastname(), dto.getFirstname());
 
-        return service.registerNewPartner(partner.getFirstname(), partner.getLastname());
+        return ResponseEntity.created(location(partnerId)).build();
+    }
+
+    private URI location(String createdId)
+    {
+        return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdId).toUri();
+    }
+
+    @Override
+    public ResponseEntity<Void> putPartner(UUID partnerId, @Valid PostPartnerDto dto)
+    {
+        service.updatePartner(partnerId, dto.getLastname(), dto.getFirstname());
+
+        return ResponseEntity.ok().build();
     }
 }

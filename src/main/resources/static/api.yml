@@ -1,0 +1,166 @@
+openapi: 3.0.0
+
+info:
+  description: "This is a service to provide partner management"
+  version: "1.0.0"
+  title: "Partner Service"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+servers:
+  - url: 'http://localhost'
+
+tags:
+  - name: "partners"
+    description: "Everything about partners"
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /partners:
+    post:
+      summary: "Register a new partner"
+      operationId: "postPartner"
+      tags:
+        - "partners"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostPartnerDto'
+      responses:
+        '201':
+          description: 'Successful registered'
+          headers:
+            location:
+              description: "id"
+              schema:
+                type: "string"
+    get:
+      summary: "Query all registered partners"
+      operationId: "GetPartners"
+      tags:
+        - "partners"
+      parameters:
+        - in: query
+          name: lastnameFilter
+          schema:
+            type: string
+          description: An optional filter to query only matching lastnames
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetPartnerDto'
+
+
+  /partners/{partnerId}:
+    parameters:
+      - in: path
+        name: partnerId
+        description: A partner's unique identifier
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      summary: "Register a new partner if not exists or update properties if it exists"
+      operationId: PutPartner"
+      tags:
+        - "partners"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostPartnerDto'
+      responses:
+        '201':
+          description: 'Successful registered'
+          headers:
+            location:
+              description: "id"
+              schema:
+                type: "string"
+        '204':
+          description: 'Succesful updated'
+    get:
+      operationId: GetPartner
+      tags:
+        - partners
+      summary: Query a specific partner by id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPartnerDto'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    PostPartnerDto:
+      type: "object"
+      required:
+        - lastname
+      properties:
+        lastname:
+          description: A partner's lastname or Surname
+          type: string
+          example: Time
+        firstname:
+          description: A partner's firstname or Forename
+          type: string
+          example: Justin
+        gender:
+          type: string
+          enum:
+            - UNKNOWN
+            - MALE
+            - FEMALE
+            - OTHER
+          example: MALE
+        nameSuffix:
+          description: A partner's name suffix or title
+          type: string
+          example: Galactic president superstar Mc Awesomeville
+        dateOfBirth:
+          description: A partner's date of birth
+          type: string
+          format: date
+          example: '1980-01-01'
+
+    GetPartnerDto:
+      allOf:
+        - $ref: '#/components/schemas/PostPartnerDto'
+        - type: object
+          required:
+            - partnerId
+            - lastName
+          properties:
+            partnerId:
+              description: A partner's unique identifier
+              type: "string"
+              readOnly: true
+              format: "uuid"
+              example: "f6c3ab3a-54e9-4554-abee-0350f848a8c9"
+

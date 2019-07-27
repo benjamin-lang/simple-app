@@ -8,3 +8,6 @@ trim_trailing_whitespace = true
 
 #[*.java] # java specific settings
 #[*.xml] # java specific settings
+
+[{*.yml, *.xml}] # yml specific settings
+indent_size = 2
