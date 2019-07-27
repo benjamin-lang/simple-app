@@ -22,7 +22,6 @@ import javax.servlet.ServletContext;
 @EnableSwagger2
 public class OpenAPIDocumentationConfig
 {
-
     @Bean
     public Docket customImplementation(ServletContext servletContext, @Value("${openapi.partnerService.base-path:}") String basePath)
     {

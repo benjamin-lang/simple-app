@@ -25,6 +25,11 @@ public class PartnerService
         this.repository = repository;
     }
 
+    public boolean exists(String partnerId)
+    {
+        return repository.existsById(partnerId);
+    }
+
     public String registerNewPartner(String lastname, String fistname)
     {
         PartnerDao partner = mapper.create(idGenerator.generateId(), lastname, fistname);
@@ -46,10 +51,16 @@ public class PartnerService
         return repository.findAll();
     }
 
-    public void updatePartner(UUID partnerId, String lastname, String firstname)
+    public Optional<String> updatePartner(UUID partnerId, String lastname, String firstname)
     {
-        PartnerDao partner = mapper.create(partnerId.toString(), lastname, firstname);
+        boolean created = !repository.existsById(partnerId.toString());
 
+        PartnerDao partner = mapper.create(partnerId.toString(), lastname, firstname);
         repository.save(partner);
+
+        if (created)
+            return Optional.of(partnerId.toString());
+
+        return Optional.empty();
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,19 +50,19 @@ public class PartnerController implements PartnersApi
     {
         String partnerId = service.registerNewPartner(dto.getLastname(), dto.getFirstname());
 
-        return ResponseEntity.created(location(partnerId)).build();
+        return responseWithLocationHeader(partnerId);
     }
 
-    private URI location(String createdId)
+    private ResponseEntity<Void> responseWithLocationHeader(String createdId)
     {
-        return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdId).toUri();
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdId).toUri()).build();
     }
 
     @Override
     public ResponseEntity<Void> putPartner(UUID partnerId, @Valid PostPartnerDto dto)
     {
-        service.updatePartner(partnerId, dto.getLastname(), dto.getFirstname());
+        Optional<String> partnerIdOpt = service.updatePartner(partnerId, dto.getLastname(), dto.getFirstname());
 
-        return ResponseEntity.ok().build();
+        return partnerIdOpt.map(this::responseWithLocationHeader).orElse(ResponseEntity.noContent().build());
     }
 }
