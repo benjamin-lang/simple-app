@@ -53,7 +53,8 @@ public class PartnerRegisterPage implements Serializable
         addMessage(String.format("%s, %s registered!", lastName, firstName));
     }
 
-    private void addMessage(String summary) {
+    private void addMessage(String summary)
+    {
         FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null);
         FacesContext.getCurrentInstance().addMessage(null, message);
     }

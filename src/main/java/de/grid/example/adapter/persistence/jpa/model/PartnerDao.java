@@ -7,10 +7,19 @@ import javax.persistence.Id;
 public class PartnerDao
 {
     @Id
-    private String id;
-
+    private String partnerId;
     private String firstname;
     private String lastname;
+
+    public String getPartnerId()
+    {
+        return partnerId;
+    }
+
+    public void setPartnerId(String partnerId)
+    {
+        this.partnerId = partnerId;
+    }
 
     public String getFirstname()
     {
@@ -32,13 +41,4 @@ public class PartnerDao
         this.lastname = lastname;
     }
 
-    public String getId()
-    {
-        return id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
-    }
 }
